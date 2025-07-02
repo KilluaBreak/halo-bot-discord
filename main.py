@@ -1,53 +1,51 @@
 import discord
 from discord.ext import commands
-from discord.ui import Button, View
 from dotenv import load_dotenv
 import os
 import random
 
-# Load .env
 load_dotenv()
+
 TOKEN = os.getenv("TOKEN")
 GUILD_ID = int(os.getenv("GUILD_ID"))
+CHANNEL_ID = int(os.getenv("CHANNEL_ID"))
 
-# Inisialisasi bot
 intents = discord.Intents.default()
-intents.members = True
+intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-# Ganti dengan ID stiker server kamu
+# Daftar ID stiker dari server kamu
 STICKER_IDS = [
-  1389838889564377188,
-  1389839121773756416,
-  1389841290795028551
+    123456789012345678,  # Ganti dengan ID stiker asli
+    987654321098765432
 ]
+
+# Tombol View
+class HaloButton(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=None)
+
+    @discord.ui.button(label="Kirim Stiker 🎉", style=discord.ButtonStyle.primary)
+    async def send_sticker(self, interaction: discord.Interaction, button: discord.ui.Button):
+        sticker_id = random.choice(STICKER_IDS)
+        await interaction.channel.send(sticker=discord.Object(id=sticker_id))
+        await interaction.response.defer()
 
 @bot.event
 async def on_ready():
     print(f"✅ Bot aktif sebagai {bot.user}")
 
-@bot.event
-async def on_member_join(member):
-    # Ganti dengan channel welcome kamu (atau pakai system_channel)
-    channel = member.guild.system_channel or discord.utils.get(member.guild.text_channels, name="general")
-    if not channel:
-        return
+    guild = bot.get_guild(GUILD_ID)
+    channel = guild.get_channel(CHANNEL_ID)
 
-    button = Button(label="Klik untuk menyapa👋", style=discord.ButtonStyle.primary, custom_id="send_sticker")
-    view = View()
-    view.add_item(button)
-
-    await channel.send(
-        content=f"Halo {member.mention}, selamat datang di **{member.guild.name}**!",
-        view=view
-    )
-
-@bot.event
-async def on_interaction(interaction: discord.Interaction):
-    if interaction.type == discord.InteractionType.component and interaction.data.get("custom_id") == "send_sticker":
-        try:
-            await interaction.response.send_message(sticker=discord.Object(STICKER_ID))
-        except Exception as e:
-            await interaction.response.send_message("❌ Gagal mengirim stiker. Pastikan bot punya izin!", ephemeral=True)
+    if channel:
+        embed = discord.Embed(
+            title="Selamat Datang!",
+            description="Klik tombol di bawah untuk mengirim stiker 🎭",
+            color=discord.Color.blurple()
+        )
+        await channel.send(embed=embed, view=HaloButton())
+    else:
+        print("❌ Channel tidak ditemukan!")
 
 bot.run(TOKEN)
