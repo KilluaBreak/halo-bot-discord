@@ -40,7 +40,7 @@ async def on_member_join(member):
         return
 
     # Ambil list emoji berdasarkan ID
-    emoji_ids = [1390327274158686280, 1390327311915548712]
+    emoji_ids = [<:dengakan_notifnya:1390327274158686280>, <:halo_bang:1390327311915548712>
     selected_id = random.choice(emoji_ids)
     selected_emoji = discord.utils.get(member.guild.emojis, id=selected_id)
 
