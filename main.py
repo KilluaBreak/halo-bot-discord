@@ -3,29 +3,37 @@ from discord.ext import commands
 import os
 import random
 
-# Ambil token dari environment variable (Railway)
 TOKEN = os.environ.get("DISCORD_TOKEN")
 
-# Aktifkan intents penting
 intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
 
-# Inisialisasi bot
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-# Tombol custom welcome
-class WelcomeView(discord.ui.View):
-    def __init__(self, emoji: discord.Emoji | str):
-        super().__init__(timeout=None)
-        self.add_item(discord.ui.Button(
-            label="Sapa!",
-            style=discord.ButtonStyle.primary,
-            emoji=emoji,
-            custom_id="welcome_button"
-        ))
+# List teks yang akan dikirim (bukan emoji object)
+TEXT_RESPONSES = [
+    "<:dengakan_notifnya:1390327274158686280>",
+    "<:halo_bang:1390327311915548712>"
+]
 
-# Bot aktif
+# Tombol interaktif
+class WelcomeView(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=None)
+
+    @discord.ui.button(label="Sapa!", style=discord.ButtonStyle.primary, custom_id="welcome_button")
+    async def greet_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        chosen_text = random.choice(TEXT_RESPONSES)
+
+        try:
+            await interaction.channel.send(f"{interaction.user.mention}{chosen_text}")
+            await interaction.response.send_message("✅ Pesan berhasil dikirim!", ephemeral=True)
+        except Exception as e:
+            print(f"❌ ERROR saat kirim: {e}")
+            await interaction.response.send_message(f"❌ Gagal kirim teks: {e}", ephemeral=True)
+
+# Bot siap
 @bot.event
 async def on_ready():
     print(f"✅ Bot aktif sebagai {bot.user} (ID: {bot.user.id})")
@@ -33,29 +41,20 @@ async def on_ready():
 # Saat member baru join
 @bot.event
 async def on_member_join(member):
-    # Cari channel dengan nama tepat "💬┃main・hall"
+    # Cari channel dengan nama tepat
     channel = discord.utils.get(member.guild.text_channels, name="💬┃main・hall")
     if not channel:
         print("⚠️ Channel 💬┃main・hall tidak ditemukan.")
         return
 
-    # Ambil list emoji berdasarkan ID
-    emoji_ids = [<:dengakan_notifnya:1390327274158686280>, <:halo_bang:1390327311915548712>
-    selected_id = random.choice(emoji_ids)
-    selected_emoji = discord.utils.get(member.guild.emojis, id=selected_id)
-
-    # Fallback kalau emoji tidak ditemukan
-    if selected_emoji is None:
-        selected_emoji = "👋"
-
-    # Buat embed welcome
     embed = discord.Embed(
         title="👋 Selamat Datang!",
-        description=f"Welcome {member.mention}! Ayo sapa dia.",
+        description=f"Welcome {member.mention}! Ayo sapa dia",
         color=discord.Color.blurple()
     )
 
-    await channel.send(embed=embed, view=WelcomeView(selected_emoji))
+    view = WelcomeView()
+    await channel.send(embed=embed, view=view)
 
 # Jalankan bot
 bot.run(TOKEN)
