@@ -27,7 +27,7 @@ class WelcomeView(discord.ui.View):
         chosen_text = random.choice(TEXT_RESPONSES)
 
         try:
-            await interaction.channel.send(f"{interaction.user.mention}{chosen_text}")
+            await interaction.channel.send(f"{chosen_text}")
             await interaction.response.send_message("✅ Pesan berhasil dikirim!", ephemeral=True)
         except Exception as e:
             print(f"❌ ERROR saat kirim: {e}")
