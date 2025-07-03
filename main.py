@@ -31,7 +31,7 @@ async def on_ready():
 async def on_member_join(member):
     # Cari channel dengan nama 'general'
     for channel in member.guild.text_channels:
-        if channel.name == "general":
+        if channel.name == "💬┃main・hall":
             embed = discord.Embed(
                 title="👋 Selamat Datang!",
                 description=f"Welcome {member.mention}! Ayo sapa dia dengan klik tombol di bawah.",
